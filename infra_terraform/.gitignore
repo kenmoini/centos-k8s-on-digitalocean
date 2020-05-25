@@ -1,0 +1,7 @@
+.generated/
+.generated/**
+.terraform/
+.terraform/**
+vars.sh
+terraform.tfstate
+terraform.tfstate.backup
