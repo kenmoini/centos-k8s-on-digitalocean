@@ -1,0 +1,46 @@
+---
+- name: Configure /etc/hosts and baseline config for all the infrastructure components
+  hosts: all
+  gather_facts: True
+  become: true
+
+  tasks:
+    - name: Template out the /etc/hosts file on every host
+      lineinfile:
+        dest: /etc/hosts
+        regexp: "{{ hostvars[item]['ansible_eth1']['ipv4']['address'] }}.*$"
+        line: "{{ hostvars[item]['ansible_eth1']['ipv4']['address'] }} {{ hostvars[item]['ansible_do_host'] }}.{{ domain }} {{ hostvars[item]['ansible_do_host'] }}"
+        state: present
+        backup: yes
+      tags: etc_hosts
+      with_items: "{{ groups.all }}"
+
+    - name: Update all system packages except K8s and Docker
+      yum:
+        name: "*"
+        state: latest
+        disablerepo:
+          - kubernetes
+          - docker-ce-stable
+        exclude: kubectl,kubeadm,kubelet,docker
+      ignore_errors: true
+
+    - name: Disable SELinux =(
+      selinux:
+        state: disabled
+
+    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+      shell: |
+        swapoff -a
+
+    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+
+    - name: Configure Sysctl and Kernel Modules
+      include: ./shared/centos_sysctl.yaml
+
+    - name: Unconditionally reboot the machine with all defaults
+      reboot:

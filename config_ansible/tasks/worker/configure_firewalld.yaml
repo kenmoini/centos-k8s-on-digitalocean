@@ -1,0 +1,18 @@
+---
+- name: FirewallD Configuration
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop:
+    - 8472/udp
+    - 10250-10255/tcp
+    - 30000-32767/tcp
+
+- name: Add Masquerade
+  shell: firewall-cmd --add-masquerade --permanent
+
+- name: Restart FirewallD service
+  service:
+    name: firewalld
+    state: reloaded

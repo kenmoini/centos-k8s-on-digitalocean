@@ -5,3 +5,5 @@
 vars.sh
 terraform.tfstate
 terraform.tfstate.backup
+.terraform.tfstate
+.terraform.tfstate.**

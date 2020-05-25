@@ -1,0 +1,19 @@
+---
+- name: Install Docker and other helpful packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+    disable_excludes: docker-ce-stable
+  with_items:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+    - docker
+    - nano
+
+- name: Enable and start Docker service
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+    daemon_reload: yes

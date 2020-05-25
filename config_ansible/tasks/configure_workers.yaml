@@ -1,0 +1,21 @@
+---
+- name: Configure Kubernetes Workers Baselines
+  hosts: kubernetesWorkerNodes
+  gather_facts: True
+  become: true
+
+  tasks:
+    - name: Install/Update/Enable FirewallD
+      include: ./shared/centos_install_firewalld.yaml
+
+    - name: Configure FirewallD for Workers
+      include: ./worker/configure_firewalld.yaml
+
+    - name: Configure K8s and Docker Repos
+      include: ./shared/centos_repos.yaml
+
+    - name: Install Docker
+      include: ./shared/centos_install_docker.yaml
+
+    - name: Install Kubernetes
+      include: ./shared/centos_install_k8s_pkgs.yaml

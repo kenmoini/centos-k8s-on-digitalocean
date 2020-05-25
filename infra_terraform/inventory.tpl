@@ -6,7 +6,7 @@ ${k8s_master_nodes}
 [kubernetesWorkerNodes]
 ${k8s_worker_nodes}
 
-[kubernetesWorkerNodes]
+[kubernetesLoadBalancerNodes]
 ${k8s_lb_nodes}
 
 [all:vars]

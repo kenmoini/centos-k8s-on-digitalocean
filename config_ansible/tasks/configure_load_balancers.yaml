@@ -1,0 +1,22 @@
+---
+- name: Configure Kubernetes Load Balancer Baselines
+  hosts: kubernetesLoadBalancerNodes
+  gather_facts: True
+  become: true
+
+  vars:
+    k8sMasters: "{{ groups['kubernetesMasterNodes'] }}"
+    k8sWorkers: "{{ groups['kubernetesWorkerNodes'] }}"
+
+  handlers:
+    - include: ../handlers/main.yaml
+
+  tasks:
+    - name: Install/Update/Enable FirewallD
+      include: ./shared/centos_install_firewalld.yaml
+
+    - name: Configure FirewallD for Workers
+      include: ./lb/configure_firewalld.yaml
+
+    - name: Deploy HAProxy
+      include: ./lb/centos_deploy_haproxy.yaml

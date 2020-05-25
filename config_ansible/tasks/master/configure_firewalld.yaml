@@ -1,0 +1,19 @@
+---
+- name: FirewallD Configuration
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop:
+    - "{{ kubernetes_api_port }}/tcp"
+    - 2379-2380/tcp
+    - 10250-10255/tcp
+    - 8472/udp
+
+- name: Add Masquerade
+  shell: firewall-cmd --add-masquerade --permanent
+
+- name: Restart FirewallD service
+  service:
+    name: firewalld
+    state: reloaded

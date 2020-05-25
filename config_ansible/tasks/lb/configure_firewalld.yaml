@@ -1,0 +1,17 @@
+---
+- name: FirewallD Configuration
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop:
+    - "{{ kubernetes_api_port }}/tcp"
+    - 80/tcp
+    - 443/tcp
+    - 80/udp
+    - 443/udp
+
+- name: Restart FirewallD service
+  service:
+    name: firewalld
+    state: reloaded

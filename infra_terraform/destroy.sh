@@ -3,19 +3,15 @@
 ## set -x	## Uncomment for debugging
 
 ## Include vars if the file exists
-FILE=./vars.sh
+FILE=../vars.sh
 if [ -f "$FILE" ]; then
-    source ./vars.sh
+    source ../vars.sh
 fi
 
-export DO_PAT=${DO_PAT:="safasdfhjasjkdfhasjfhasfkh"}
+RECORDS=("api.${STACK_NAME}" "*.api.${STACK_NAME}" "apps.${STACK_NAME}" "*.apps.${STACK_NAME}" "${STACK_NAME}" "*.${STACK_NAME}" "${STACK_NAME}-k8smasternode-0" "${STACK_NAME}-k8smasternode-1" "${STACK_NAME}-k8smasternode-2" "${STACK_NAME}-k8sworkernode-0" "${STACK_NAME}-k8sworkernode-1"  "${STACK_NAME}-k8sloadbalancernode-0")
+record_type="A"
 
-RECORDS=("api.polyglotK8s" "*.api.polyglotK8s" "apps.polyglotK8s" "*.apps.polyglotK8s" "polyglotk8s" "*.polyglotk8s" "polyglotk8s-k8smasternode-0" "polyglotk8s-k8smasternode-1" "polyglotk8s-k8smasternode-2" "polyglotk8s-k8sworkernode-0" "polyglotK8s-k8sworkernode-1"  "polyglotK8s-k8sloadbalancernode-0")
-
-#terraform destroy -var "do_token=${DO_PAT}"
-
-rm -rf ./.generated/
-
+terraform destroy
 
 ## check to see if a record exists
 function checkRecord() {
@@ -41,11 +37,13 @@ function deleteRecord() {
 
 for d in ${RECORDS[@]}; do
     record_name="${d,,}"
-    record_type="A"
-    checkRecord "polyglot.host" "${d,,}"
+    checkRecord $DOMAIN "${d,,}"
     if [ $? -eq 0 ]; then
         for recid in $returned_record_id; do
-        deleteRecord $domain $recid
+          deleteRecord $DOMAIN $recid
         done
     fi
 done
+
+
+rm -rf ./.generated/

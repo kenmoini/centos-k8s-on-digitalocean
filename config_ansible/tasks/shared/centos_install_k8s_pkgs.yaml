@@ -1,0 +1,17 @@
+---
+- name: Install kubelet, kubeadm, kubectl
+    yum:
+      name: "{{ item }}"
+      state: latest
+      disable_excludes: kubernetes
+    with_items:
+      - kubeadm
+      - kubelet
+      - kubectl
+
+- name: Enable and start kubelet service
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes
+    daemon_reload: yes
