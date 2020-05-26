@@ -8,9 +8,9 @@
     - name: Ensure k8s repo is installed
       include: ./shared/centos_repos.yaml
 
-    - name: Install Kubectl
+    - name: Install Kubectl and stuff
       yum:
-        name: kubectl
+        name: ["kubectl", "git", "nano"]
         disable_excludes: kubernetes
         state: latest
 

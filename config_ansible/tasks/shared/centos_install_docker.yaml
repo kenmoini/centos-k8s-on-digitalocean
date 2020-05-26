@@ -1,16 +1,17 @@
 ---
 - name: Install Docker and other helpful packages
   yum:
-    name: "{{ item }}"
+    name:
+      [
+        "yum-utils",
+        "device-mapper-persistent-data",
+        "lvm2",
+        "docker",
+        "nano",
+        "nfs-utils",
+      ]
     state: latest
     disable_excludes: docker-ce-stable
-  with_items:
-    - yum-utils
-    - device-mapper-persistent-data
-    - lvm2
-    - docker
-    - nano
-    - nfs-utils
 
 - name: Disable JournalD logging
   shell: sed -i 's/ --log-driver=journald//g' /etc/sysconfig/docker

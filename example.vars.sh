@@ -21,7 +21,7 @@ WORKER_NODE_IMAGE="centos-7-x64"
 DO_DATA_CENTER="nyc1"
 
 KUBERNETES_API_PORT="6443"
-KUBERNETES_CNI="calico" # options are 'flannel', 'calico', and 'weave'
+KUBERNETES_CNI="flannel" # options are 'flannel', 'calico', and 'weave'
 
 KUBERNETES_CREATE_GLOBAL_CLUSTER_ADMIN_SERVICE_ACCOUNT="true"
 KUBERNETES_GLOBAL_CLUSTER_ADMIN_SERVICE_ACCOUNT_NAME="${STACK_NAME}-admin"
@@ -52,3 +52,15 @@ export TF_VAR_k8s_worker_node_size=$WORKER_NODE_SIZE
 export TF_VAR_k8s_worker_node_image=$WORKER_NODE_IMAGE
 export TF_VAR_k8s_lb_node_size=$LOADBALANCER_NODE_SIZE
 export TF_VAR_k8s_lb_node_image=$LOADBALANCER_NODE_IMAGE
+
+if [ $KUBERNETES_CNI = "calico" ]; then
+  KUBERNETES_CNI_CIDR="192.168.0.0/16"
+fi
+
+if [ $KUBERNETES_CNI = "flannel" ]; then
+  KUBERNETES_CNI_CIDR="10.244.0.0/16"
+fi
+
+if [ $KUBERNETES_CNI = "weave" ]; then
+  KUBERNETES_CNI_CIDR="192.168.0.0/16"
+fi
