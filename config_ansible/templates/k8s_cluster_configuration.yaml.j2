@@ -1,10 +1,24 @@
-apiVersion: kubeadm.k8s.io/v1beta1
+apiVersion: kubeadm.k8s.io/v1beta2 # TODO: Update to new API version... https://pkg.go.dev/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2?tab=doc
 kind: ClusterConfiguration
 kubernetesVersion: v1.18.3 # change according to kubeadm supported version
 apiServer:
+  bindPort: {{ kubernetes_api_port }}
   certSANs:
   - 127.0.0.1
-  - cluster-api.example.com # change according to your requirements
+  - {{ stack_name }}
+  - {{ stack_name }}.{{ domain }}
+  - "*.{{ stack_name }}.{{ domain }}"
+  - "*.api.{{ stack_name }}.{{ domain }}"
+  - "*.apps.{{ stack_name }}.{{ domain }}"
+  - kubernetes
+  - kubernetes.default
+  - {{ stack_name }}.default
+  - kubernetes.default.svc
+  - {{ stack_name }}.default.svc
+  - kubernetes.default.svc.cluster.local
+  - "*.kubernetes.default.svc.cluster.local"
+  - {{ stack_name }}.default.svc.cluster.local
+  - "*.{{ stack_name }}.default.svc.cluster.local"
   extraArgs:
     authorization-mode: Node,RBAC
     feature-gates: "TTLAfterFinished=true"
@@ -24,14 +38,16 @@ apiServer:
     pathType: DirectoryOrCreate
   timeoutForControlPlane: 4m0s
 certificatesDir: /etc/kubernetes/pki
-clusterName: {{ stack_name }}
-controlPlaneEndpoint: ""
+## clusterName: {{ stack_name }}
+clusterName: kubernetes
+controlPlaneEndpoint: "api.{{ stack_name }}.{{ domain }}:{{ kubernetes_api_port }}"
 controllerManager: 
   extraArgs:
     feature-gates: "TTLAfterFinished=true"
     bind-address: 0.0.0.0
 dns:
-  type: CoreDNS
+  #type: CoreDNS
+  type: kube-dns
 etcd:
   local:
     dataDir: /var/lib/etcd

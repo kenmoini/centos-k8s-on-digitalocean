@@ -46,4 +46,4 @@ for d in ${RECORDS[@]}; do
 done
 
 
-rm -rf ./.generated/
+rm -rf ../.generated/

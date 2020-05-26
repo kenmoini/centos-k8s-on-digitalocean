@@ -1,0 +1,11 @@
+---
+- name: Create Kubernetes directory if it does not exist
+  file:
+    path: /etc/kubernetes/
+    state: directory
+    mode: "0755"
+
+- name: Template over cluster config file
+  template:
+    src: ../templates/k8s_cluster_configuration.yaml.j2
+    dest: /etc/kubernetes/cluster_configuration.yaml

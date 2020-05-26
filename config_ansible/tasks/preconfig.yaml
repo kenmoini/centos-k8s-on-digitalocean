@@ -19,9 +19,6 @@
       yum:
         name: "*"
         state: latest
-        disablerepo:
-          - kubernetes
-          - docker-ce-stable
         exclude: kubectl,kubeadm,kubelet,docker
       ignore_errors: true
 

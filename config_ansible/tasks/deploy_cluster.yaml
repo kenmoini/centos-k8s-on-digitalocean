@@ -1,0 +1,51 @@
+---
+- name: Configure Initial Kubernetes Master
+  hosts: kubernetesMasterNodes[0]
+  gather_facts: True
+  become: true
+
+  tasks:
+    - name: Create Initial Master
+      include: ./master/create_initial_master.yaml
+
+    - name: Download Kube Config file
+      fetch:
+        src: /root/.kube/config.external
+        dest: "../../.generated/.{{ stack_name }}.{{ domain }}/pulled-kube.conf"
+        flat: yes
+
+    - name: Download Kubeadm Complete
+      fetch:
+        src: /opt/.kubeadmint-complete
+        dest: "../../.generated/.{{ stack_name }}.{{ domain }}/pulled-kubeadm-complete"
+        flat: yes
+
+    - name: Configure Calico CNI
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      when: kubernetes_cni == "calico"
+
+    - name: Configure Flannel CNI
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      when: kubernetes_cni == "flannel"
+
+    - name: Configure Weave CNI
+      shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+      when: kubernetes_cni == "weave"
+
+- name: Configure Other Kubernetes Master
+  hosts: kubernetesMasterNodes[1:]
+  gather_facts: True
+  become: true
+
+  tasks:
+    - name: Create Other Master
+      include: ./master/create_other_masters.yaml
+
+- name: Configure Kubernetes Worker Nodes
+  hosts: kubernetesWorkerNodes
+  gather_facts: True
+  become: true
+
+  tasks:
+    - name: Create Other Master
+      include: ./worker/create_workers.yaml

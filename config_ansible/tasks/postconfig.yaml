@@ -1,0 +1,78 @@
+---
+- name: Post Configure of Kubernetes Cluster
+  hosts: kubernetesLoadBalancerNodes[0]
+  gather_facts: True
+  become: true
+
+  tasks:
+    - name: Ensure k8s repo is installed
+      include: ./shared/centos_repos.yaml
+
+    - name: Install Kubectl
+      yum:
+        name: kubectl
+        disable_excludes: kubernetes
+        state: latest
+
+    - name: Create root user kubeconf directory
+      file:
+        path: /root/.kube/
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy over kubeconf
+      copy:
+        src: "../../.generated/.{{ stack_name }}.{{ domain }}/pulled-kube.conf"
+        dest: "/root/.kube/config"
+        owner: root
+        group: root
+
+    - name: Remove taint from masters
+      shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+      when: kubernetes_remove_taint_from_masters|bool
+
+    - name: Create Admin Service Account and Cluster Role Binding
+      shell: |
+        kubectl create serviceaccount {{ kubernetes_global_cluster_admin_service_account_name }} -n kube-system
+        kubectl create clusterrolebinding {{ kubernetes_global_cluster_admin_service_account_name }}-crb --clusterrole=cluster-admin --serviceaccount=kube-system:{{ kubernetes_global_cluster_admin_service_account_name }}
+      when: kubernetes_create_global_cluster_admin_service_account|bool
+
+    - name: Deploy Metrics Server
+      shell: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
+      when: kubernetes_deploy_metrics_server|bool
+
+    - name: Deploy Logviewer
+      shell: |
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/minikube/master/deploy/addons/logviewer/logviewer-rbac.yaml.tmpl
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/minikube/master/deploy/addons/logviewer/logviewer-dp-and-svc.yaml.tmpl
+      when: kubernetes_deploy_logviewer|bool
+
+    - name: Deploy Kubernetes Dashboard
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+      when: kubernetes_deploy_dashboard|bool
+
+    - name: Download Helm Installer
+      get_url:
+        url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        dest: /opt/get_helm.sh
+        mode: "0700"
+        owner: root
+        group: root
+      when: kubernetes_deploy_helm|bool
+
+    - name: Install Helm 3
+      shell: "/opt/get_helm.sh 2>&1 | tee /opt/.helm-complete"
+      args:
+        creates: /opt/.helm-complete
+      when: kubernetes_deploy_helm|bool
+
+    - name: Add Helm Repos
+      shell: |
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        helm repo add traefik https://containous.github.io/traefik-helm-chart
+        helm repo update
+      when: kubernetes_deploy_helm|bool

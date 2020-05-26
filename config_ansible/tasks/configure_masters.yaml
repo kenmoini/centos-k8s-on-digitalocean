@@ -22,3 +22,6 @@
 
     - name: Install Kubernetes
       include: ./shared/centos_install_k8s_pkgs.yaml
+
+    - name: Copy over Cluster Configuration YAML
+      include: ./master/create_cluster_config.yaml

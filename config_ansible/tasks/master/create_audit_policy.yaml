@@ -1,7 +1,13 @@
 ---
+- name: Create Kubernetes directory if it does not exist
+  file:
+    path: /etc/kubernetes/
+    state: directory
+    mode: "0755"
+
 - name: Copy over audit policy file
   copy:
-    src: files/k8s_audit_poliicy.yaml
+    src: ../files/k8s_audit_policy.yaml
     dest: /etc/kubernetes/audit-policy.yaml
 
 - name: Create audit log directory if it does not exist

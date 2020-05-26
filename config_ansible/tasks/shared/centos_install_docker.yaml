@@ -10,6 +10,16 @@
     - lvm2
     - docker
     - nano
+    - nfs-utils
+
+- name: Disable JournalD logging
+  shell: sed -i 's/ --log-driver=journald//g' /etc/sysconfig/docker
+
+- name: Create container log directory if it does not exist
+  file:
+    path: /var/log/containers
+    state: directory
+    mode: "0755"
 
 - name: Enable and start Docker service
   systemd:

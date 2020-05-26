@@ -1,0 +1,46 @@
+---
+- name: Prepull Kubernetes Images
+  shell: kubeadm config images pull
+
+- name: Run Kubeadm deployment
+  shell: "kubeadm init --upload-certs --config /etc/kubernetes/cluster_configuration.yaml 2>&1 | tee /opt/.kubeadmint-complete"
+  args:
+    creates: /opt/.kubeadmint-complete
+
+- name: Get Master Join Command
+  shell: "firstJoin=$(awk '/kubeadm join/{ print NR; exit }' /opt/.kubeadmint-complete) && head -n $((${firstJoin} + 2)) /opt/.kubeadmint-complete | tail -n 3 | sed -e 's/^[[:space:]]*//'"
+  register: masterJoinCommand
+
+- name: Get Worker Join Command
+  shell: "tail -n 2 /opt/.kubeadmint-complete | sed -e 's/^[[:space:]]*//'"
+  register: workerJoinCommand
+
+- name: "Add K8S Join Commands to dummy host"
+  add_host:
+    name: "K8S_CMD_HOLDER"
+    k8s_master_join_cmd: "{{ masterJoinCommand.stdout }}"
+    k8s_worker_join_cmd: "{{ workerJoinCommand.stdout }}"
+
+- name: Create root user kubeconf directory on primary master
+  file:
+    path: /root/.kube/
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Copy kube conf to root user on primary master
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: yes
+    owner: root
+    group: root
+
+- name: Copy kube conf to root user on primary master for external use
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config.external
+    remote_src: yes
+    owner: root
+    group: root

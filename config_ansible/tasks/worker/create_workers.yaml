@@ -1,0 +1,5 @@
+---
+- name: Run Kubeadm deployment
+  shell: "{{ hostvars['K8S_CMD_HOLDER']['k8s_worker_join_cmd'] }} 2>&1 | tee /opt/.kubeadmint-complete"
+  args:
+    creates: /opt/.kubeadmint-complete

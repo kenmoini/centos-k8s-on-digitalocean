@@ -1,0 +1,24 @@
+---
+- name: Prepull Kubernetes Images
+  shell: kubeadm config images pull
+
+- name: Run Kubeadm deployment
+  shell: "{{ hostvars['K8S_CMD_HOLDER']['k8s_master_join_cmd'] }} 2>&1 | tee /opt/.kubeadmin-master-complete"
+  args:
+    creates: /opt/.kubeadmin-master-complete
+
+- name: Create root user kubeconf directory on primary master
+  file:
+    path: /root/.kube/
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Copy kube conf to root user on primary master
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: yes
+    owner: root
+    group: root
