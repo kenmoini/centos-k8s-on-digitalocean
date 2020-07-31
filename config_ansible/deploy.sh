@@ -36,7 +36,7 @@ ansible-playbook -i ../.generated/.${STACK_NAME}.${DOMAIN}/inventory \
   --extra-vars "domain=${DOMAIN}" \
   --extra-vars "kubernetes_api_port=${KUBERNETES_API_PORT}" \
   --extra-vars "kubernetes_cni=${KUBERNETES_CNI}" \
-  --extra-vars "kubernetes_cni_cidr=${KUBERNETES_CNI_CIDR}" \
+  --extra-vars "kubernetes_cni_cidr=\"${KUBERNETES_CNI_CIDR}\"" \
   --extra-vars "kubernetes_create_global_cluster_admin_service_account=${KUBERNETES_CREATE_GLOBAL_CLUSTER_ADMIN_SERVICE_ACCOUNT}" \
   --extra-vars "kubernetes_global_cluster_admin_service_account_name=${KUBERNETES_GLOBAL_CLUSTER_ADMIN_SERVICE_ACCOUNT_NAME}" \
   --extra-vars "kubernetes_deploy_dashboard=${KUBERNETES_DEPLOY_DASHBOARD}" \

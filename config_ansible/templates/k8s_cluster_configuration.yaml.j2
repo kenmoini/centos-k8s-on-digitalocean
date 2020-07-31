@@ -1,6 +1,6 @@
 apiVersion: kubeadm.k8s.io/v1beta2 # TODO: Update to new API version... https://pkg.go.dev/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2?tab=doc
 kind: ClusterConfiguration
-kubernetesVersion: v1.18.3 # change according to kubeadm supported version
+kubernetesVersion: v1.18.6 # change according to kubeadm supported version
 apiServer:
   bindPort: {{ kubernetes_api_port }}
   certSANs:
@@ -50,6 +50,7 @@ dns:
   type: kube-dns
 etcd:
   local:
+    imageRepository: "k8s.gcr.io"
     dataDir: /var/lib/etcd
 imageRepository: k8s.gcr.io
 networking:

@@ -20,8 +20,12 @@
         dest: "../../.generated/.{{ stack_name }}.{{ domain }}/pulled-kubeadm-complete"
         flat: yes
 
+    - name: Create Calico CNI
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
+      when: kubernetes_cni == "calico"
+
     - name: Configure Calico CNI
-      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/custom-resources.yaml
       when: kubernetes_cni == "calico"
 
     - name: Configure Flannel CNI

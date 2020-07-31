@@ -33,4 +33,5 @@ ansible-playbook -i ../.generated/.${STACK_NAME}.${DOMAIN}/inventory \
   --extra-vars "kubernetes_deploy_metrics_server=${KUBERNETES_DEPLOY_METRICS_SERVER}" \
   --extra-vars "kubernetes_deploy_logviewer=${KUBERNETES_DEPLOY_LOGVIEWER}" \
   --extra-vars "kubernetes_deploy_helm=${KUBERNETES_DEPLOY_HELM}" \
+  --extra-vars "kubernetes_deploy_nginx_ingress=${KUBERNETES_DEPLOY_NGINX_INGRESS}" \
   tasks/postconfig.yaml

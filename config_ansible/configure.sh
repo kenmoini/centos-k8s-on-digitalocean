@@ -46,6 +46,7 @@ ansible-playbook -i ../.generated/.${STACK_NAME}.${DOMAIN}/inventory \
   --extra-vars "stack_name=${STACK_NAME}" \
   --extra-vars "domain=${DOMAIN}" \
   --extra-vars "kubernetes_api_port=${KUBERNETES_API_PORT}" \
+  --extra-vars "kubernetes_cni_cidr=\"${KUBERNETES_CNI_CIDR}\"" \
   tasks/configure_masters.yaml
 
 ansible-playbook -i ../.generated/.${STACK_NAME}.${DOMAIN}/inventory \

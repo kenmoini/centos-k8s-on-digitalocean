@@ -40,12 +40,12 @@ global
 # use if not designated in their block
 #---------------------------------------------------------------------
 defaults
-    mode                    http
+    #mode                    http
     log                     global
-    option                  httplog
-    option                  dontlognull
-    option http-server-close
-    option forwardfor       except 127.0.0.0/8
+    #option                  httplog
+    #option                  dontlognull
+    #option http-server-close
+    #option forwardfor       except 127.0.0.0/8
     option                  redispatch
     retries                 3
     timeout http-request    10s
@@ -58,23 +58,25 @@ defaults
     maxconn                 3000
 
 frontend k8s-api
-    # bind {{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:443
-    # bind 127.0.0.1:443
-    bind :{{ kubernetes_api_port }}
+    # bind {{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:{{ kubernetes_api_port }}
+    bind 127.0.0.1:{{ kubernetes_api_port }}
+    bind 0.0.0.0:{{ kubernetes_api_port }}
     mode tcp
     option tcplog
     timeout client 300000
     default_backend k8s-api
 
 frontend k8s-http-ingress
-    bind :80
+    bind 127.0.0.1:80
+    bind 0.0.0.0:80
     mode tcp
     option tcplog
     timeout client 300000
     default_backend k8s-http-ingress
 
 frontend k8s-https-ingress
-    bind :443
+    bind 127.0.0.1:443
+    bind 0.0.0.0:443
     mode tcp
     option tcplog
     timeout client 300000

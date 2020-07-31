@@ -1,7 +1,7 @@
 ---
-- name: Post Configure of Kubernetes Cluster
+- name: Post Configure of Kubernetes Cluster on Load Balancer Bastion
   hosts: kubernetesLoadBalancerNodes[0]
-  gather_facts: True
+  gather_facts: true
   become: true
 
   tasks:
@@ -34,9 +34,12 @@
       when: kubernetes_remove_taint_from_masters|bool
 
     - name: Create Admin Service Account and Cluster Role Binding
-      shell: |
-        kubectl create serviceaccount {{ kubernetes_global_cluster_admin_service_account_name }} -n kube-system
-        kubectl create clusterrolebinding {{ kubernetes_global_cluster_admin_service_account_name }}-crb --clusterrole=cluster-admin --serviceaccount=kube-system:{{ kubernetes_global_cluster_admin_service_account_name }}
+      shell:
+        cmd: |
+          kubectl create serviceaccount {{ kubernetes_global_cluster_admin_service_account_name }} -n kube-system
+          kubectl create clusterrolebinding {{ kubernetes_global_cluster_admin_service_account_name }}-crb --clusterrole=cluster-admin --serviceaccount=kube-system:{{ kubernetes_global_cluster_admin_service_account_name }}
+          touch /opt/.sa-crb-init-complete
+        creates: /opt/.sa-crb-init-complete
       when: kubernetes_create_global_cluster_admin_service_account|bool
 
     - name: Deploy Metrics Server
@@ -50,8 +53,21 @@
       when: kubernetes_deploy_logviewer|bool
 
     - name: Deploy Kubernetes Dashboard
-      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml
       when: kubernetes_deploy_dashboard|bool
+
+    - name: Deploy Nginx Ingress (Cloud, NodePorts)
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud/deploy.yaml
+      when: kubernetes_deploy_nginx_ingress|bool
+
+    - name: Download calicoctl
+      get_url:
+        url: https://github.com/projectcalico/calicoctl/releases/download/v3.15.1/calicoctl
+        dest: /usr/local/bin/calicoctl
+        mode: "0755"
+        owner: root
+        group: root
+      when: kubernetes_cni == "calico"
 
     - name: Download Helm Installer
       get_url:

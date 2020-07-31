@@ -43,6 +43,7 @@ variable "k8s_lb_node_image" {
   default = "centos-7-x64"
 }
 variable "do_token" {}
+variable "do_vpc_cidr" {}
 
 provider "digitalocean" {
   token = var.do_token
@@ -88,8 +89,9 @@ resource "local_file" "ansible_inventory" {
 }
 
 resource "digitalocean_vpc" "k8sVPC" {
-  name   = "${var.stack_name}-k8s-network"
+  name   = "${var.stack_name}-k8s-priv-net"
   region = var.do_datacenter
+  ip_range = var.do_vpc_cidr
 }
 
 resource "digitalocean_droplet" "k8sMaster_droplets" {
